@@ -21,6 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ru.manzharovn.whac_a_mole.R
 import ru.manzharovn.whac_a_mole.model.Hole
+import ru.manzharovn.whac_a_mole.model.MoleStatus
 import ru.manzharovn.whac_a_mole.ui.theme.WhacAMoleTheme
 import ru.manzharovn.whac_a_mole.utils.GameStatus
 import ru.manzharovn.whac_a_mole.utils.intToTime
@@ -144,11 +145,15 @@ fun HoleOrMole(
             indication = null,
             interactionSource = remember { MutableInteractionSource() }
             ) {
-                if(hole.hasMole)
+                if(hole.moleStatus == MoleStatus.Show)
                     tapOnMole(hole)
             },
         painter = painterResource(
-            id = if(hole.hasMole) R.drawable.ic_hole_with_mole else R.drawable.ic_hole
+            id = when(hole.moleStatus) {
+                MoleStatus.None -> R.drawable.ic_hole
+                MoleStatus.Whacked -> R.drawable.ic_whacked_mole
+                MoleStatus.Show -> R.drawable.ic_hole_with_mole
+            }
         ),
         contentDescription = "hole"
     )
@@ -233,12 +238,6 @@ fun PreviewPause() {
 @Composable
 fun PreviewHoles() {
     WhacAMoleTheme() {
-        Holes(
-            listOf(
-                Hole(false), Hole(false), Hole(false),
-                Hole(false), Hole(false), Hole(false),
-                Hole(false), Hole(false), Hole(false),
-            ),
-            {})
+
     }
 }

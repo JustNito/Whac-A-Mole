@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.*
 import ru.manzharovn.whac_a_mole.data.repository.ScoreRepository
 import ru.manzharovn.whac_a_mole.model.Hole
+import ru.manzharovn.whac_a_mole.model.MoleStatus
 import ru.manzharovn.whac_a_mole.utils.AMOUNT_OF_TIME
 import ru.manzharovn.whac_a_mole.utils.GameStatus
 import ru.manzharovn.whac_a_mole.utils.SCORE_PER_MOLE
@@ -78,9 +79,9 @@ class GameViewModel (private val repository: ScoreRepository) : ViewModel() {
     private suspend fun putMoleInHole() {
         while(true) {
             val index = Random.nextInt(0, 9)
-            _holes[index] = _holes[index].copy(hasMole = true)
+            _holes[index] = _holes[index].copy(moleStatus = MoleStatus.Show)
             delay(500)
-            _holes[index] = _holes[index].copy(hasMole = false)
+            _holes[index] = _holes[index].copy(moleStatus = MoleStatus.None)
         }
 
     }
@@ -89,14 +90,18 @@ class GameViewModel (private val repository: ScoreRepository) : ViewModel() {
         if(_holes.isNotEmpty())
             _holes.clear()
         for (x in 0 until 9) {
-            _holes.add(Hole(false))
+            _holes.add(Hole(MoleStatus.None))
         }
     }
 
     fun tapOnMole(hole: Hole) {
-        val index = _holes.indexOf(hole)
-        _holes[index] = _holes[index].copy(hasMole = false)
-        _score += SCORE_PER_MOLE
+        viewModelScope.launch {
+            val index = _holes.indexOf(hole)
+            _holes[index] = _holes[index].copy(MoleStatus.Whacked)
+            delay(100)
+            _holes[index] = _holes[index].copy(MoleStatus.None)
+            _score += SCORE_PER_MOLE
+        }
     }
 
     private suspend fun countDown() {
