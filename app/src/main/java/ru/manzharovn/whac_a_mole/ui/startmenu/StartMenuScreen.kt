@@ -6,10 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,12 +50,13 @@ fun StartMenu(
             modifier = Modifier.padding(8.dp),
             text = stringResource(id = R.string.high_score, highScore)
         )
-        Button(
+        OutlinedButton(
             shape = RoundedCornerShape(20.dp),
             onClick = toGameScreen
         ) {
             Text(
                 style = MaterialTheme.typography.subtitle2,
+                color = MaterialTheme.colors.secondaryVariant,
                 text = stringResource(R.string.play_button_text)
             )
         }

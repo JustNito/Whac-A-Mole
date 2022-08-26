@@ -129,7 +129,7 @@ fun Header(
             onClick = onPause
         ) {
             Icon(
-                tint = MaterialTheme.colors.primaryVariant,
+                tint = MaterialTheme.colors.secondaryVariant,
                 modifier = Modifier.size(50.dp),
                 imageVector = Icons.Outlined.PauseCircleOutline,
                 contentDescription = "pause button"

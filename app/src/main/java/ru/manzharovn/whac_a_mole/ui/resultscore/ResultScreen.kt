@@ -74,14 +74,20 @@ fun Result(
             modifier = paddingModifier,
             onClick = playAgain
         ) {
-            Text(text = stringResource(id = R.string.play_again_button))
+            Text(
+                color = MaterialTheme.colors.secondaryVariant,
+                text = stringResource(id = R.string.play_again_button)
+            )
         }
         OutlinedButton(
             shape = RoundedCornerShape(20.dp),
             modifier = paddingModifier,
             onClick = toMainMenu
         ) {
-            Text(text = stringResource(id = R.string.main_menu_button))
+            Text(
+                color = MaterialTheme.colors.secondaryVariant,
+                text = stringResource(id = R.string.main_menu_button)
+            )
         }
     }
 }
