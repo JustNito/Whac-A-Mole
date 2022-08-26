@@ -105,9 +105,11 @@ class GameViewModel (private val repository: ScoreRepository) : ViewModel() {
     fun tapOnMole(hole: Hole) = viewModelScope.launch {
         if(hole.moleStatus != MoleStatus.Animation) {
             val index = _holes.indexOf(hole)
-            animationJob.cancel()
-            _holes[index] = _holes[index].copy(MoleStatus.None)
-            _score += SCORE_PER_MOLE
+            if(index != -1) {
+                animationJob.cancel()
+                _holes[index] = _holes[index].copy(MoleStatus.None)
+                _score += SCORE_PER_MOLE
+            }
         }
     }
 
