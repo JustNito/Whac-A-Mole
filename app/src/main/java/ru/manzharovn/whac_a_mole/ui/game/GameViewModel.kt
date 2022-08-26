@@ -1,18 +1,19 @@
 package ru.manzharovn.whac_a_mole.ui.game
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.*
+import ru.manzharovn.whac_a_mole.R
 import ru.manzharovn.whac_a_mole.data.repository.ScoreRepository
 import ru.manzharovn.whac_a_mole.model.Hole
 import ru.manzharovn.whac_a_mole.model.MoleStatus
-import ru.manzharovn.whac_a_mole.utils.AMOUNT_OF_TIME
-import ru.manzharovn.whac_a_mole.utils.GameStatus
-import ru.manzharovn.whac_a_mole.utils.SCORE_PER_MOLE
+import ru.manzharovn.whac_a_mole.utils.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.random.Random
 
@@ -38,7 +39,12 @@ class GameViewModel (private val repository: ScoreRepository) : ViewModel() {
     val holes: List<Hole>
         get() = _holes
 
+    private var _currentFrame by mutableStateOf(R.drawable.ic_hole)
+    val currentFrame: Int
+        get() = _currentFrame
+
     private lateinit var coroutineContext: CoroutineContext
+    private lateinit var animationJob: Job
 
     init {
         resetHoles()
@@ -79,11 +85,13 @@ class GameViewModel (private val repository: ScoreRepository) : ViewModel() {
     private suspend fun putMoleInHole() {
         while(true) {
             val index = Random.nextInt(0, 9)
-            _holes[index] = _holes[index].copy(moleStatus = MoleStatus.Show)
-            delay(500)
-            _holes[index] = _holes[index].copy(moleStatus = MoleStatus.None)
+            startMoleAnimation(index,true)
+            animationJob = viewModelScope.launch {
+                delay(500)
+                startMoleAnimation(index, false)
+            }
+            animationJob.join()
         }
-
     }
 
     private fun resetHoles() {
@@ -94,11 +102,10 @@ class GameViewModel (private val repository: ScoreRepository) : ViewModel() {
         }
     }
 
-    fun tapOnMole(hole: Hole) {
-        viewModelScope.launch {
+    fun tapOnMole(hole: Hole) = viewModelScope.launch {
+        if(hole.moleStatus != MoleStatus.Animation) {
             val index = _holes.indexOf(hole)
-            _holes[index] = _holes[index].copy(MoleStatus.Whacked)
-            delay(100)
+            animationJob.cancel()
             _holes[index] = _holes[index].copy(MoleStatus.None)
             _score += SCORE_PER_MOLE
         }
@@ -119,6 +126,26 @@ class GameViewModel (private val repository: ScoreRepository) : ViewModel() {
     private fun changeHighScore() {
         if(_score > repository.getHighScore()) {
             repository.setHighScore(_score)
+        }
+    }
+
+    private suspend fun startMoleAnimation(holeIndex: Int, isReverse: Boolean) {
+        var frames = framesOfMoleAnimation
+        if (isReverse) {
+            frames = frames.reversed()
+        }
+        _holes[holeIndex] = _holes[holeIndex].copy(moleStatus = MoleStatus.Animation)
+        for (frame in frames) {
+            _currentFrame = frame
+            delay(2)
+        }
+        if(isReverse) {
+            _holes[holeIndex] = _holes[holeIndex].copy(moleStatus = MoleStatus.Show)
+            _currentFrame = R.drawable.ic_hole_with_mole
+        }
+        else {
+            _holes[holeIndex] = _holes[holeIndex].copy(moleStatus = MoleStatus.None)
+            _currentFrame = R.drawable.ic_hole
         }
     }
 
